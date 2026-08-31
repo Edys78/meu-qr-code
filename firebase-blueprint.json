@@ -1,0 +1,60 @@
+{
+  "$schema": "https://firebase.google.com/schemas/firestore-blueprint.json",
+  "collections": [
+    {
+      "id": "users",
+      "description": "User accounts, billing status, and quotas",
+      "fields": {
+        "uid": { "type": "string", "required": true },
+        "email": { "type": "string", "required": true },
+        "displayName": { "type": "string", "required": false },
+        "photoURL": { "type": "string", "required": false },
+        "plan": { "type": "string", "required": true, "enum": ["free", "pro", "business"] },
+        "subscriptionStatus": { "type": "string", "required": true, "enum": ["active", "past_due", "canceled", "trialing"] },
+        "dynamicQRLimit": { "type": "number", "required": true },
+        "totalScansLimit": { "type": "number", "required": true },
+        "createdAt": { "type": "timestamp", "required": true },
+        "updatedAt": { "type": "timestamp", "required": true }
+      }
+    },
+    {
+      "id": "qrcodes",
+      "description": "Static and dynamic QR Codes created by users",
+      "fields": {
+        "id": { "type": "string", "required": true },
+        "userId": { "type": "string", "required": true },
+        "shortCode": { "type": "string", "required": true },
+        "name": { "type": "string", "required": true },
+        "type": { "type": "string", "required": true, "enum": ["url", "pix", "wifi", "vcard", "text", "whatsapp", "email"] },
+        "targetUrl": { "type": "string", "required": true },
+        "isDynamic": { "type": "boolean", "required": true },
+        "isActive": { "type": "boolean", "required": true },
+        "totalScans": { "type": "number", "required": true },
+        "scansThisMonth": { "type": "number", "required": false },
+        "design": { "type": "map", "required": true },
+        "pixPayload": { "type": "map", "required": false },
+        "wifiPayload": { "type": "map", "required": false },
+        "vcardPayload": { "type": "map", "required": false },
+        "whatsappPayload": { "type": "map", "required": false },
+        "createdAt": { "type": "timestamp", "required": true },
+        "updatedAt": { "type": "timestamp", "required": true }
+      }
+    },
+    {
+      "id": "scans",
+      "description": "Anonymized access and analytics logs for dynamic QR codes",
+      "fields": {
+        "qrId": { "type": "string", "required": true },
+        "userId": { "type": "string", "required": true },
+        "shortCode": { "type": "string", "required": true },
+        "timestamp": { "type": "timestamp", "required": true },
+        "country": { "type": "string", "required": false },
+        "city": { "type": "string", "required": false },
+        "deviceType": { "type": "string", "required": false },
+        "os": { "type": "string", "required": false },
+        "browser": { "type": "string", "required": false },
+        "referer": { "type": "string", "required": false }
+      }
+    }
+  ]
+}

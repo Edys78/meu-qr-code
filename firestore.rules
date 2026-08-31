@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // User profile and account limits
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId
+                    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['plan', 'subscriptionStatus', 'dynamicQRLimit', 'totalScansLimit']));
+      allow delete: if false; // Users can only be archived/deleted via cloud function
+    }
+
+    // QR Codes collection
+    match /qrcodes/{qrId} {
+      // Anyone can read public metadata for dynamic redirect lookup if needed, or owner can read
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == resource.data.userId;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Scans / Analytics collection
+    match /scans/{scanId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if true; // Allows server and public redirect tracking
+      allow update, delete: if false;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Meu QR-code",
+  "description": "Plataforma SaaS de geração, personalização avançada, gerenciamento de QR Codes estáticos e dinâmicos com suporte a PIX, analytics em tempo real, leitor por câmera e controle de planos.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
