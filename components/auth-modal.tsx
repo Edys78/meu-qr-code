@@ -46,6 +46,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setError('Este e-mail já está cadastrado. Faça login.');
       } else if (err.code === 'auth/weak-password') {
         setError('A senha deve ter pelo menos 6 caracteres.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError('Este domínio não está na lista de domínios autorizados do Firebase para login com Google. Utilize o login por E-mail e Senha ou o Modo Visitante abaixo, que funcionam livremente em qualquer domínio.');
       } else {
         setError(err.message || 'Erro ao processar autenticação.');
       }
@@ -60,7 +62,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       await signInWithGoogle();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Erro ao entrar com Google.');
+      console.error('Google Auth Error:', err);
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('O domínio de publicação (ex: Netlify) não está autorizado no Google OAuth deste projeto. Para acessar no Netlify, utilize o cadastro/login por E-mail e Senha ou o Modo Visitante.');
+      } else {
+        setError(err.message || 'Erro ao entrar com Google.');
+      }
     }
   };
 
