@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     description: 'Crie QR Codes estáticos e dinâmicos com rastreamento de acessos e personalização avançada.',
     type: 'website',
   },
+  verification: {
+    google: 'NBHCONPKZ7LDbMVrFhQX6VSdXF3tDgQ4QpCsdD5YiGE',
+  },
   other: {
     'google-adsense-account': 'ca-pub-8480512856430313',
   },
