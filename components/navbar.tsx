@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { 
   QrCode, 
@@ -25,11 +26,26 @@ interface NavbarProps {
 }
 
 export function Navbar({ currentTab, setCurrentTab }: NavbarProps) {
+  const router = useRouter();
   const { user, profile, signOut, signInAsGuest } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const planName = profile?.plan ? PLANS[profile.plan]?.name : 'Gratuito';
+
+  const handleGuestLogin = async () => {
+    await signInAsGuest();
+    setCurrentTab('qrcodes');
+    router.push('/');
+    router.refresh();
+  };
+
+  const handleAuthSuccess = () => {
+    setAuthModalOpen(false);
+    setCurrentTab('qrcodes');
+    router.push('/');
+    router.refresh();
+  };
 
   return (
     <>
@@ -114,7 +130,7 @@ export function Navbar({ currentTab, setCurrentTab }: NavbarProps) {
               <div className="flex items-center gap-2">
                 <button
                   id="btn-guest-mode"
-                  onClick={() => signInAsGuest()}
+                  onClick={handleGuestLogin}
                   className="px-3 py-1.5 text-xs text-slate-300 hover:text-white hover:bg-slate-900 rounded-xl border border-slate-800 transition-all"
                 >
                   Modo Visitante
@@ -201,7 +217,11 @@ export function Navbar({ currentTab, setCurrentTab }: NavbarProps) {
       </header>
 
       {/* Auth Modal */}
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      <AuthModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)} 
+        onSuccess={handleAuthSuccess}
+      />
     </>
   );
 }

@@ -1,15 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { X, Mail, Lock, User, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
+  const router = useRouter();
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword, signInAsGuest } = useAuth();
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
   const [email, setEmail] = useState('');
@@ -21,6 +24,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   if (!isOpen) return null;
 
+  const handleAuthSuccess = () => {
+    router.push('/');
+    router.refresh();
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      onClose();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -30,10 +43,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       if (mode === 'login') {
         await signInWithEmail(email, password);
-        onClose();
+        handleAuthSuccess();
       } else if (mode === 'register') {
         await signUpWithEmail(email, password, name);
-        onClose();
+        handleAuthSuccess();
       } else if (mode === 'forgot') {
         await resetPassword(email);
         setSuccess('E-mail de recuperação enviado com sucesso. Verifique sua caixa de entrada.');
@@ -60,7 +73,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setError(null);
     try {
       await signInWithGoogle();
-      onClose();
+      handleAuthSuccess();
     } catch (err: any) {
       console.error('Google Auth Error:', err);
       if (err.code === 'auth/unauthorized-domain') {
@@ -75,7 +88,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setError(null);
     try {
       await signInAsGuest();
-      onClose();
+      handleAuthSuccess();
     } catch (err: any) {
       setError(err.message || 'Erro ao entrar como visitante.');
     }

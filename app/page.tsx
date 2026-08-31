@@ -28,7 +28,7 @@ export default function HomePage() {
   const [analyticsTargetQR, setAnalyticsTargetQR] = useState<QRCodeRecord | null>(null);
 
   const handleQRCreated = (qr: QRCodeRecord) => {
-    // Optionally switch to table or stay in creator
+    setCurrentTab('qrcodes');
   };
 
   const handleViewAnalytics = (qr: QRCodeRecord) => {

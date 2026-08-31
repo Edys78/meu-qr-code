@@ -35,9 +35,11 @@ import {
   ShieldAlert, 
   ArrowRight,
   Zap,
-  Info
+  Info,
+  LogIn
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { AuthModal } from './auth-modal';
 
 interface QRCreatorWizardProps {
   onCreated?: (qr: QRCodeRecord) => void;
@@ -46,6 +48,7 @@ interface QRCreatorWizardProps {
 
 export function QRCreatorWizard({ onCreated, initialData }: QRCreatorWizardProps) {
   const { user, profile } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'content' | 'design' | 'frames'>('content');
   const [qrType, setQrType] = useState<QRType>(initialData?.type || 'pix');
   const [isDynamic, setIsDynamic] = useState<boolean>(initialData?.isDynamic ?? false);
@@ -148,7 +151,7 @@ export function QRCreatorWizard({ onCreated, initialData }: QRCreatorWizardProps
   // Handle Save
   const handleSaveQRCode = async () => {
     if (!user) {
-      setSaveError('Faça login ou continue como visitante para salvar seus QR Codes.');
+      setAuthModalOpen(true);
       return;
     }
 
@@ -987,6 +990,16 @@ export function QRCreatorWizard({ onCreated, initialData }: QRCreatorWizardProps
           </p>
         </div>
       </div>
+
+      {/* Auth Modal Trigger */}
+      <AuthModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)} 
+        onSuccess={() => {
+          setAuthModalOpen(false);
+          handleSaveQRCode();
+        }}
+      />
     </div>
   );
 }
