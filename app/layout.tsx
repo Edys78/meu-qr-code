@@ -1,4 +1,5 @@
 import type {Metadata} from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { AuthProvider } from '@/hooks/use-auth';
 
@@ -15,6 +16,13 @@ export const metadata: Metadata = {
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="pt-BR" className="dark">
+      <head>
+        <Script
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8480512856430313"
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-emerald-500 selection:text-slate-950" suppressHydrationWarning>
         <AuthProvider>
           {children}
