@@ -139,7 +139,7 @@ export default function HomePage() {
             </div>
             <span className="font-bold text-slate-200">Meu QR-code</span>
             <span className="text-slate-600">|</span>
-            <span>SaaS de QR Codes Estáticos, Dinâmicos & PIX</span>
+            <span>QR Codes Estáticos, Dinâmicos & PIX</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-6 text-slate-400">

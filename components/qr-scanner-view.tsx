@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, Upload, Copy, Check, ExternalLink, RefreshCw, AlertCircle, ShieldCheck, Zap, StopCircle } from 'lucide-react';
+import { Camera, Upload, Copy, Check, ExternalLink, RefreshCw, AlertCircle, ShieldCheck, Zap, StopCircle, FileText } from 'lucide-react';
 import jsQR from 'jsqr';
 import { Html5Qrcode } from 'html5-qrcode';
+import { TextPdfReaderModal } from './text-pdf-reader-modal';
 
 export function QRScannerView() {
   const [activeTab, setActiveTab] = useState<'camera' | 'upload'>('camera');
@@ -12,6 +13,7 @@ export function QRScannerView() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [textPdfModalOpen, setTextPdfModalOpen] = useState(false);
 
   const html5QrRef = useRef<Html5Qrcode | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -290,7 +292,7 @@ export function QRScannerView() {
                 href={scanResult}
                 target="_blank"
                 rel="noreferrer"
-                className="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-md"
+                className="flex-1 min-w-[130px] py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-md"
               >
                 <span>Acessar Link</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -298,8 +300,16 @@ export function QRScannerView() {
             )}
 
             <button
+              onClick={() => setTextPdfModalOpen(true)}
+              className="flex-1 min-w-[140px] py-2.5 px-4 rounded-xl font-medium text-xs flex items-center justify-center gap-1.5 transition-all bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/40"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Ler em Texto / PDF</span>
+            </button>
+
+            <button
               onClick={handleCopy}
-              className={`flex-1 py-2.5 px-4 rounded-xl font-medium text-xs flex items-center justify-center gap-1.5 transition-all ${
+              className={`flex-1 min-w-[130px] py-2.5 px-4 rounded-xl font-medium text-xs flex items-center justify-center gap-1.5 transition-all ${
                 copied
                   ? 'bg-emerald-500 text-slate-950'
                   : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
@@ -313,12 +323,22 @@ export function QRScannerView() {
               ) : (
                 <>
                   <Copy className="w-4 h-4" />
-                  <span>{isPix ? 'Copiar Código PIX' : 'Copiar Conteúdo'}</span>
+                  <span>{isPix ? 'Copiar PIX' : 'Copiar'}</span>
                 </>
               )}
             </button>
           </div>
         </div>
+      )}
+
+      {/* Text & PDF Reader Modal */}
+      {scanResult && (
+        <TextPdfReaderModal
+          isOpen={textPdfModalOpen}
+          onClose={() => setTextPdfModalOpen(false)}
+          text={scanResult}
+          title="Conteúdo do QR Code Escaneado"
+        />
       )}
     </div>
   );

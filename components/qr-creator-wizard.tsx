@@ -40,6 +40,10 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AuthModal } from './auth-modal';
+import { TextPdfReaderModal } from './text-pdf-reader-modal';
+import { formatPhoneBR, getWhatsAppCleanNumber } from '@/lib/utils';
+import { downloadTextAsPDF } from '@/lib/pdf-generator';
+import { Download, Eye, Volume2 } from 'lucide-react';
 
 interface QRCreatorWizardProps {
   onCreated?: (qr: QRCodeRecord) => void;
@@ -56,6 +60,7 @@ export function QRCreatorWizard({ onCreated, initialData }: QRCreatorWizardProps
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [textPdfModalOpen, setTextPdfModalOpen] = useState(false);
 
   // Content States
   const [url, setUrl] = useState(initialData?.targetUrl || 'https://');
@@ -74,7 +79,7 @@ export function QRCreatorWizard({ onCreated, initialData }: QRCreatorWizardProps
 
   // WhatsApp State
   const [whatsapp, setWhatsapp] = useState<WhatsAppData>(initialData?.whatsappData || {
-    phone: '5511999998888',
+    phone: '(11)99999-9999',
     message: 'Olá! Gostaria de mais informações.',
   });
 
@@ -92,7 +97,7 @@ export function QRCreatorWizard({ onCreated, initialData }: QRCreatorWizardProps
     lastName: 'Silva',
     organization: 'Minha Empresa',
     title: 'Diretor',
-    phone: '+55 11 98888-7777',
+    phone: '(11)98888-7777',
     email: 'contato@empresa.com.br',
     website: 'https://empresa.com.br',
   });
@@ -128,7 +133,7 @@ export function QRCreatorWizard({ onCreated, initialData }: QRCreatorWizardProps
       case 'url':
         return url.trim() || 'https://meuqrcode.com.br';
       case 'whatsapp':
-        const cleanPhone = whatsapp.phone.replace(/\D/g, '');
+        const cleanPhone = getWhatsAppCleanNumber(whatsapp.phone);
         const encodedMsg = encodeURIComponent(whatsapp.message || '');
         return `https://wa.me/${cleanPhone}?text=${encodedMsg}`;
       case 'wifi':
@@ -390,11 +395,14 @@ export function QRCreatorWizard({ onCreated, initialData }: QRCreatorWizardProps
                     <input
                       type="text"
                       value={pix.key}
-                      onChange={(e) => setPix({ ...pix, key: e.target.value })}
+                      onChange={(e) => setPix({ 
+                        ...pix, 
+                        key: pix.keyType === 'phone' ? formatPhoneBR(e.target.value) : e.target.value 
+                      })}
                       placeholder={
                         pix.keyType === 'cpf' ? '000.000.000-00' :
                         pix.keyType === 'cnpj' ? '00.000.000/0000-00' :
-                        pix.keyType === 'phone' ? '11999998888' :
+                        pix.keyType === 'phone' ? '(11)99999-9999' :
                         pix.keyType === 'email' ? 'financeiro@empresa.com' : 'Chave EVP...'
                       }
                       className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-emerald-500"
@@ -469,14 +477,21 @@ export function QRCreatorWizard({ onCreated, initialData }: QRCreatorWizardProps
             {qrType === 'whatsapp' && (
               <div className="space-y-3 bg-slate-950/80 p-5 rounded-2xl border border-slate-800">
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-400 mb-1">Número WhatsApp (com DDD)</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[11px] font-medium text-slate-400">Número WhatsApp (com DDD)</label>
+                    <span className="text-[10px] text-emerald-400 font-mono">Ex: (11)99999-9999</span>
+                  </div>
                   <input
                     type="text"
                     value={whatsapp.phone}
-                    onChange={(e) => setWhatsapp({ ...whatsapp, phone: e.target.value })}
-                    placeholder="Ex: 5511999998888"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-emerald-500"
+                    onChange={(e) => setWhatsapp({ ...whatsapp, phone: formatPhoneBR(e.target.value) })}
+                    placeholder="(11)99999-9999"
+                    maxLength={15}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-emerald-500 font-mono"
                   />
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    Formatado automaticamente no padrão brasileiro com DDD.
+                  </p>
                 </div>
                 <div>
                   <label className="block text-[11px] font-medium text-slate-400 mb-1">Mensagem Pré-definida (Opcional)</label>
@@ -548,27 +563,74 @@ export function QRCreatorWizard({ onCreated, initialData }: QRCreatorWizardProps
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-400 mb-1">Telefone / WhatsApp</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[11px] font-medium text-slate-400">Telefone / Celular</label>
+                    <span className="text-[10px] text-purple-400 font-mono">Ex: (11)98888-7777</span>
+                  </div>
                   <input
                     type="text"
                     value={vcard.phone}
-                    onChange={(e) => setVcard({ ...vcard, phone: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-purple-500"
+                    onChange={(e) => setVcard({ ...vcard, phone: formatPhoneBR(e.target.value) })}
+                    placeholder="(11)98888-7777"
+                    maxLength={15}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-purple-500 font-mono"
                   />
                 </div>
               </div>
             )}
 
             {qrType === 'text' && (
-              <div className="space-y-2 bg-slate-950/80 p-5 rounded-2xl border border-slate-800">
-                <label className="block text-xs font-semibold text-slate-300">Texto a Codificar</label>
+              <div className="space-y-3 bg-slate-950/80 p-5 rounded-2xl border border-slate-800">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                    <FileText className="w-4 h-4 text-cyan-400" />
+                    <span>Texto / Mensagem Livre</span>
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    {text.length} caracteres • {text.trim() ? text.trim().split(/\s+/).length : 0} palavras
+                  </span>
+                </div>
+
                 <textarea
-                  rows={3}
+                  rows={4}
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="Digite qualquer texto..."
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-slate-500 resize-none"
+                  placeholder="Digite aqui o texto, mensagem, comunicado, nota ou aviso..."
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-hidden focus:border-cyan-500 resize-none font-sans leading-relaxed"
                 />
+
+                {/* Text & PDF Reading and Export Actions */}
+                <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
+                  <div className="text-[11px] text-slate-400">
+                    Opções de leitura do texto:
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTextPdfModalOpen(true)}
+                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition-colors"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Ler como Texto / Voz</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (text.trim()) {
+                          downloadTextAsPDF(text, { title: qrName || 'Mensagem de Texto' });
+                        } else {
+                          setTextPdfModalOpen(true);
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 text-xs font-medium flex items-center gap-1.5 transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Exportar em PDF</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -999,6 +1061,14 @@ export function QRCreatorWizard({ onCreated, initialData }: QRCreatorWizardProps
           setAuthModalOpen(false);
           handleSaveQRCode();
         }}
+      />
+
+      {/* Text & PDF Reader Modal */}
+      <TextPdfReaderModal
+        isOpen={textPdfModalOpen}
+        onClose={() => setTextPdfModalOpen(false)}
+        text={text}
+        title={qrName || 'Mensagem de Texto'}
       />
     </div>
   );

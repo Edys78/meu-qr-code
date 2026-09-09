@@ -63,9 +63,6 @@ export function Navbar({ currentTab, setCurrentTab }: NavbarProps) {
               <div>
                 <span className="text-base font-bold text-slate-100 tracking-tight flex items-center gap-1.5">
                   Meu QR-code
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-400 font-semibold px-1.5 py-0.5 rounded-sm">
-                    SaaS
-                  </span>
                 </span>
                 <span className="text-[11px] text-slate-400 block -mt-0.5">
                   Estático, Dinâmico & PIX
