@@ -7,6 +7,7 @@ import { QRListTable } from '@/components/qr-list-table';
 import { QRScannerView } from '@/components/qr-scanner-view';
 import { AnalyticsDashboard } from '@/components/analytics-dashboard';
 import { BillingView } from '@/components/billing-view';
+import { PromoCarouselBanner } from '@/components/promo-carousel-banner';
 import { QRCodeRecord } from '@/lib/types';
 import { 
   Zap, 
@@ -42,7 +43,10 @@ export default function HomePage() {
       <Navbar currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        {/* AdSense Style Horizontal Promo Carousel Banner */}
+        <PromoCarouselBanner />
+
         {/* Tab 1: QR Generator */}
         {currentTab === 'generator' && (
           <div className="space-y-10">
